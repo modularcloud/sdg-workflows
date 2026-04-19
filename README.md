@@ -40,50 +40,42 @@ cd .loopx/spec-test-adr && npm install && cd -
 
 ## 3. Set environment variables with `loopx env`
 
-`loopx env set <NAME> <VALUE>` stores a variable globally so every `loopx run` picks it up. Only set the ones that apply to the scenario you're using.
+`loopx env set <NAME> <VALUE>` stores a variable globally so every `loopx run` picks it up.
 
-### Recommended for every scenario (optional)
+### Required for everyone
 
-Raises Claude Code's effort level so it thinks harder on each iteration. Recommended but not required:
-
-```bash
-loopx env set CLAUDE_CODE_EFFORT_LEVEL max
-```
-
-### Scenario A — `ralph` loop
-
-`ralph` sends Telegram pings at the start of each iteration and when the work is judged ready. Both vars are required:
+Telegram is the default reviewer and `ralph` also posts to Telegram, so both vars are always needed:
 
 ```bash
 loopx env set TELEGRAM_BOT_TOKEN <your-bot-token>   # from @BotFather
 loopx env set TELEGRAM_CHAT_ID   <your-chat-id>     # numeric chat ID the bot posts to
 ```
 
-### Scenario B — ADR workflows with the **Telegram** reviewer (default)
+When a prompt is sent to Telegram, the intended flow is: **copy the prompt, paste it into ChatGPT Pro, then paste ChatGPT's answer back into the Telegram chat.** Reply messages received within a 10s window are concatenated into one answer.
 
-The workflow sends the review prompt to Telegram and waits for your reply. The intended flow is: **copy the prompt out of Telegram, paste it into ChatGPT Pro, then paste ChatGPT's answer back into the Telegram chat.** Reply messages received within a 10s window are concatenated into one answer.
+### Optional for everyone
+
+Raises Claude Code's effort level so it thinks harder on each iteration:
 
 ```bash
-loopx env set LOOPX_REVIEWER    telegram            # default; setting it explicitly is optional
-loopx env set TELEGRAM_BOT_TOKEN <your-bot-token>
-loopx env set TELEGRAM_CHAT_ID   <your-chat-id>
+loopx env set CLAUDE_CODE_EFFORT_LEVEL max
 ```
 
-### Scenario C — ADR workflows with the **Codex** reviewer
+### Optional: use Codex instead of Telegram for ADR reviews
 
-Sends the prompt to the local `codex` CLI, no Telegram round-trip. Fully automated:
+Sends review prompts to the local `codex` CLI instead of Telegram — fully automated, no copy/paste:
 
 ```bash
 loopx env set LOOPX_REVIEWER codex
 ```
 
-### Scenario D — ADR workflows with the **API** reviewer (GPT-5.4-Pro batch)
+### Optional: use the OpenAI Batch API instead of Telegram for ADR reviews
 
-Submits the prompt as an OpenAI batch job and polls until completion:
+Submits review prompts as an OpenAI batch job (GPT-5.4-Pro) and polls until completion:
 
 ```bash
-loopx env set LOOPX_REVIEWER  api
-loopx env set OPENAI_API_KEY  <your-openai-key>
+loopx env set LOOPX_REVIEWER   api
+loopx env set OPENAI_API_KEY   <your-openai-key>
 loopx env set GPT_PRO_THINKING medium               # optional: medium (default) | high | xhigh
 ```
 
