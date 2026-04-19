@@ -13,71 +13,107 @@ A collection of [loopx](https://github.com/lzrscg/loopx) workflows used to drive
 | `apply-adr` | After an ADR is accepted, iterates with a reviewer to apply the ADR's changes to `SPEC.md`. |
 | `spec-test-adr` | After `SPEC.md` is updated for an ADR, iterates with a reviewer to update `TEST-SPEC.md`. |
 
-## Install
+## 1. Install loopx and the workflows
 
 ```bash
-# 1. Install loopx globally
+# Install loopx globally
 npm install -g loopx
 
-# 2. Install these workflows into your project's .loopx/ directory
-cd /path/to/your/loopx-project
-loopx install lzrscg/sdg-workflows            # installs all four
-loopx install -w ralph lzrscg/sdg-workflows   # or install just one
+# From your project root, install these workflows into .loopx/
+loopx install modularcloud/sdg-workflows            # all four
+loopx install -w ralph modularcloud/sdg-workflows   # or just one
 ```
 
-If you plan to use the `api` reviewer mode, also run `npm install` inside each workflow directory that needs it:
+If you plan to use the `api` reviewer (GPT batch), also install its Node dependencies:
 
 ```bash
-cd .loopx/apply-adr && npm install
-cd .loopx/review-adr && npm install
-cd .loopx/spec-test-adr && npm install
+cd .loopx/apply-adr && npm install && cd -
+cd .loopx/review-adr && npm install && cd -
+cd .loopx/spec-test-adr && npm install && cd -
 ```
 
-## Required tools on PATH
+## 2. Required tools on PATH
 
 - `claude` — Claude Code CLI (all workflows)
-- `codex` — Codex CLI (used by `check-question.sh` in the ADR workflows, and when `LOOPX_REVIEWER=codex`)
+- `codex` — Codex CLI (used by the `check-question` step in the ADR workflows, and when `LOOPX_REVIEWER=codex`)
 - `jq`, `curl` — used by the Telegram reviewer and `ralph`
 
-## Environment variables
+## 3. Set environment variables with `loopx env`
 
-| Variable | Used by | Notes |
-|---|---|---|
-| `TELEGRAM_BOT_TOKEN` | `ralph`, ADR workflows (telegram mode) | Bot token from @BotFather. |
-| `TELEGRAM_CHAT_ID` | `ralph`, ADR workflows (telegram mode) | Numeric chat ID that will receive prompts and supply replies. |
-| `LOOPX_REVIEWER` | ADR workflows | `telegram` (default), `codex`, or `api`. Selects how review prompts are sent out and answers are collected. |
-| `OPENAI_API_KEY` | ADR workflows when `LOOPX_REVIEWER=api` | Required for the GPT batch reviewer. |
-| `GPT_PRO_THINKING` | ADR workflows when `LOOPX_REVIEWER=api` | Optional, `medium` (default) / `high` / `xhigh`. |
+`loopx env set <NAME> <VALUE>` stores a variable globally so every `loopx run` picks it up. Only set the ones that apply to the scenario you're using.
 
-Set them however you prefer — shell export, a local `.env` file passed via `loopx run -e .env`, etc.
+### Recommended for every scenario (optional)
 
-## Required project files
+Raises Claude Code's effort level so it thinks harder on each iteration. Recommended but not required:
 
-Each workflow assumes these files already exist at the project root:
+```bash
+loopx env set CLAUDE_CODE_EFFORT_LEVEL max
+```
+
+### Scenario A — `ralph` loop
+
+`ralph` sends Telegram pings at the start of each iteration and when the work is judged ready. Both vars are required:
+
+```bash
+loopx env set TELEGRAM_BOT_TOKEN <your-bot-token>   # from @BotFather
+loopx env set TELEGRAM_CHAT_ID   <your-chat-id>     # numeric chat ID the bot posts to
+```
+
+### Scenario B — ADR workflows with the **Telegram** reviewer (default)
+
+The workflow sends the review prompt to Telegram and waits for your reply. The intended flow is: **copy the prompt out of Telegram, paste it into ChatGPT Pro, then paste ChatGPT's answer back into the Telegram chat.** Reply messages received within a 10s window are concatenated into one answer.
+
+```bash
+loopx env set LOOPX_REVIEWER    telegram            # default; setting it explicitly is optional
+loopx env set TELEGRAM_BOT_TOKEN <your-bot-token>
+loopx env set TELEGRAM_CHAT_ID   <your-chat-id>
+```
+
+### Scenario C — ADR workflows with the **Codex** reviewer
+
+Sends the prompt to the local `codex` CLI, no Telegram round-trip. Fully automated:
+
+```bash
+loopx env set LOOPX_REVIEWER codex
+```
+
+### Scenario D — ADR workflows with the **API** reviewer (GPT-5.4-Pro batch)
+
+Submits the prompt as an OpenAI batch job and polls until completion:
+
+```bash
+loopx env set LOOPX_REVIEWER  api
+loopx env set OPENAI_API_KEY  <your-openai-key>
+loopx env set GPT_PRO_THINKING medium               # optional: medium (default) | high | xhigh
+```
+
+### Inspect / remove
+
+```bash
+loopx env list
+loopx env remove <NAME>
+```
+
+## 4. Required project files
+
+Each workflow assumes these files exist at the project root:
 
 - `ralph` — `PROMPT.md`
 - `review-adr` — `adr/0001-adr-process.md`, `adr/0004-tmpdir-and-args.md`, `SPEC.md`
 - `apply-adr` — `adr/0001-adr-process.md`, `adr/0002-run-subcommand.md`, `SPEC.md`
 - `spec-test-adr` — `adr/0001-adr-process.md`, `adr/0002-run-subcommand.md`, `SPEC.md`, `TEST-SPEC.md`
 
-If you want to target a different ADR number, edit the `ADR_0002` / `ADR_0004` assignments at the top of the relevant `index.sh`.
+To target a different ADR number, edit the `ADR_0002` / `ADR_0004` assignments at the top of the relevant `index.sh`.
 
-## Run
+## 5. Run
 
 ```bash
-# Ralph loop — keep running PROMPT.md through Claude until READY
-export TELEGRAM_BOT_TOKEN=...
-export TELEGRAM_CHAT_ID=...
 loopx run ralph
-
-# Review / apply / spec-test an ADR (pick a reviewer)
-export LOOPX_REVIEWER=telegram   # or: codex, api
 loopx run review-adr
 loopx run apply-adr
 loopx run spec-test-adr
 
-# Cap iterations
-loopx run -n 5 ralph
+loopx run -n 5 ralph   # cap iterations
 ```
 
-Each workflow halts on its own when done (`stop: true`) or when you hit the `-n` limit. Ctrl-C also exits cleanly.
+Each workflow halts on its own when done (`stop: true`) or when `-n` is hit. Ctrl-C also exits cleanly.
