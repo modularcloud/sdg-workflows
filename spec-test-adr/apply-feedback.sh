@@ -13,16 +13,19 @@ fi
 
 FEEDBACK=$(cat "$FEEDBACK_FILE")
 
-ADR_0002=$(cat "$ROOT/adr/0002-run-subcommand.md")
+RESOLVED=$("$SHARED_DIR/resolve-adr.sh")
+IFS=$'\t' read -r ADR_NUM ADR_FILE <<< "$RESOLVED"
+ADR_REL="adr/$(basename "$ADR_FILE")"
+ADR_CONTENT=$(cat "$ADR_FILE")
 SPEC=$(cat "$ROOT/SPEC.md")
 TEST_SPEC=$(cat "$ROOT/TEST-SPEC.md")
 
-PROMPT="ADR-0002 has been accepted and SPEC.md has already been updated to incorporate its changes (per the ADR process in ADR-0001). I am now updating TEST-SPEC.md to cover the new and changed spec behavior introduced by ADR-0002. I received the following feedback on the current state of TEST-SPEC.md. Apply this feedback by updating TEST-SPEC.md only — do not modify SPEC.md or ADR-0002, they are read-only references in this cycle. ADR-0002 and the updated SPEC.md are the authoritative sources for what TEST-SPEC.md should cover. If there is any ambiguity about my intentions, ask me clarifying questions. Think critically about this feedback and push back if warranted. After you finish, commit and push.
+PROMPT="ADR-$ADR_NUM has been accepted and SPEC.md has already been updated to incorporate its changes (per the ADR process in ADR-0001). I am now updating TEST-SPEC.md to cover the new and changed spec behavior introduced by ADR-$ADR_NUM. I received the following feedback on the current state of TEST-SPEC.md. Apply this feedback by updating TEST-SPEC.md only — do not modify SPEC.md or ADR-$ADR_NUM, they are read-only references in this cycle. ADR-$ADR_NUM and the updated SPEC.md are the authoritative sources for what TEST-SPEC.md should cover. If there is any ambiguity about my intentions, ask me clarifying questions. Think critically about this feedback and push back if warranted. After you finish, commit and push.
 
-adr/0002-run-subcommand.md (accepted — read-only reference):
-$ADR_0002
+$ADR_REL (accepted — read-only reference):
+$ADR_CONTENT
 
-SPEC.md (already updated for ADR-0002 — read-only reference):
+SPEC.md (already updated for ADR-$ADR_NUM — read-only reference):
 $SPEC
 
 Current TEST-SPEC.md (target of updates):

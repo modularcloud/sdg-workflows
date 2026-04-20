@@ -13,13 +13,16 @@ fi
 
 FEEDBACK=$(cat "$FEEDBACK_FILE")
 
-ADR_0002=$(cat "$ROOT/adr/0002-run-subcommand.md")
+RESOLVED=$("$SHARED_DIR/resolve-adr.sh")
+IFS=$'\t' read -r ADR_NUM ADR_FILE <<< "$RESOLVED"
+ADR_REL="adr/$(basename "$ADR_FILE")"
+ADR_CONTENT=$(cat "$ADR_FILE")
 SPEC=$(cat "$ROOT/SPEC.md")
 
-PROMPT="ADR-0002 has been accepted and I am now updating SPEC.md to incorporate its changes (per the ADR process in ADR-0001). I received the following feedback on the current state of SPEC.md. Apply this feedback by updating SPEC.md only. ADR-0002 is the authoritative reference for what should change — do not modify it. If there is any ambiguity about my intentions, ask me clarifying questions. Think critically about this feedback and push back if warranted. After you finish, commit and push.
+PROMPT="ADR-$ADR_NUM has been accepted and I am now updating SPEC.md to incorporate its changes (per the ADR process in ADR-0001). I received the following feedback on the current state of SPEC.md. Apply this feedback by updating SPEC.md only. ADR-$ADR_NUM is the authoritative reference for what should change — do not modify it. If there is any ambiguity about my intentions, ask me clarifying questions. Think critically about this feedback and push back if warranted. After you finish, commit and push.
 
-adr/0002-run-subcommand.md (accepted — read-only reference):
-$ADR_0002
+$ADR_REL (accepted — read-only reference):
+$ADR_CONTENT
 
 Current SPEC.md:
 $SPEC

@@ -2,7 +2,7 @@
 
 A collection of [loopx](https://github.com/lzrscg/loopx) workflows used to drive the ADR process for the `loopx` project itself.
 
-> ⚠️ **Not ready for external use.** These workflows hardcode specific ADR filenames (e.g. `adr/0002-run-subcommand.md`, `adr/0004-tmpdir-and-args.md`) and expect a particular project layout (`SPEC.md`, `TEST-SPEC.md`, `adr/`, `PROMPT.md`). To use them on another project you will need to fork and edit the `index.sh` of each workflow. They are published here for reference and personal use, not as a general-purpose tool.
+> ⚠️ **Not ready for external use.** These workflows expect a particular project layout (`SPEC.md`, `TEST-SPEC.md`, `adr/`, `PROMPT.md`) and the ADR lifecycle defined in `adr/0001-adr-process.md`. They are published here for reference and personal use, not as a general-purpose tool.
 
 ## Workflows
 
@@ -104,19 +104,35 @@ loopx env remove <NAME>
 Each workflow assumes these files exist at the project root:
 
 - `ralph` — `PROMPT.md`
-- `review-adr` — `adr/0001-adr-process.md`, `adr/0004-tmpdir-and-args.md`, `SPEC.md`
-- `apply-adr` — `adr/0001-adr-process.md`, `adr/0002-run-subcommand.md`, `SPEC.md`
-- `spec-test-adr` — `adr/0001-adr-process.md`, `adr/0002-run-subcommand.md`, `SPEC.md`, `TEST-SPEC.md`
+- `review-adr` — `adr/0001-adr-process.md`, `adr/NNNN-*.md` (target ADR), `SPEC.md`
+- `apply-adr` — `adr/0001-adr-process.md`, `adr/NNNN-*.md` (target ADR), `SPEC.md`
+- `spec-test-adr` — `adr/0001-adr-process.md`, `adr/NNNN-*.md` (target ADR), `SPEC.md`, `TEST-SPEC.md`
 
-To target a different ADR number, edit the `ADR_0002` / `ADR_0004` assignments at the top of the relevant `index.sh`.
+The target ADR is selected per run via the `ADR` env var (see §5).
+
+### Bootstrap the `adr/` directory
+
+If your project does not yet have an `adr/` directory or an `adr/0001-adr-process.md`, create one and drop in the bundled template:
+
+```bash
+mkdir -p adr
+curl -fsSL -o adr/0001-adr-process.md \
+  https://raw.githubusercontent.com/modularcloud/sdg-workflows/main/adr/0001-adr-process.md
+```
+
+Then author your own target ADRs as `adr/NNNN-short-slug.md` (e.g. `adr/0002-run-subcommand.md`).
 
 ## 5. Run
 
+The three ADR workflows resolve their target ADR from the `ADR` env var. Either `ADR=4` or `ADR=0004` works — the value is zero-padded to four digits and matched against `adr/NNNN-*.md`.
+
 ```bash
 loopx run ralph
-loopx run review-adr
-loopx run apply-adr
-loopx run spec-test-adr
+
+# ADR workflows — set ADR per run
+ADR=4 loopx run review-adr
+ADR=2 loopx run apply-adr
+ADR=2 loopx run spec-test-adr
 
 loopx run -n 5 ralph   # cap iterations
 ```
