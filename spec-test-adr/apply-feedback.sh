@@ -5,6 +5,7 @@ ROOT="$LOOPX_PROJECT_ROOT"
 SHARED_DIR="$ROOT/.loopx/shared"
 FEEDBACK_FILE="$SHARED_DIR/.feedback.tmp"
 CLAUDE_OUTPUT_FILE="$SHARED_DIR/.claude-output.tmp"
+SESSION_FILE="$SHARED_DIR/.session.tmp"
 
 if [[ ! -f "$FEEDBACK_FILE" ]]; then
   echo "Error: No feedback file found at $FEEDBACK_FILE" >&2
@@ -34,7 +35,10 @@ $TEST_SPEC
 Feedback:
 $FEEDBACK"
 
-CLAUDE_OUTPUT=$(echo "$PROMPT" | claude --dangerously-skip-permissions -p 2>/dev/null)
+SESSION_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+echo "$SESSION_ID" > "$SESSION_FILE"
+
+CLAUDE_OUTPUT=$(echo "$PROMPT" | claude --dangerously-skip-permissions --session-id "$SESSION_ID" -p 2>/dev/null)
 
 rm -f "$FEEDBACK_FILE"
 echo "$CLAUDE_OUTPUT" > "$CLAUDE_OUTPUT_FILE"
