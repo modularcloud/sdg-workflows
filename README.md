@@ -12,6 +12,7 @@ A collection of [loopx](https://github.com/lzrscg/loopx) workflows used to drive
 | `review-adr` | Asks a reviewer whether a draft ADR can be marked accepted; iterates on Q&A until no questions remain. |
 | `apply-adr` | After an ADR is accepted, iterates with a reviewer to apply the ADR's changes to `SPEC.md`. |
 | `spec-test-adr` | After `SPEC.md` is updated for an ADR, iterates with a reviewer to update `TEST-SPEC.md`. |
+| `shared` | Library workflow — holds the reviewer-dispatch, Telegram Q&A loop, and feedback-done check used by the three ADR workflows. Not run directly. |
 
 ## 1. Install loopx and the workflows
 
@@ -20,16 +21,18 @@ A collection of [loopx](https://github.com/lzrscg/loopx) workflows used to drive
 npm install -g loopx
 
 # From your project root, install these workflows into .loopx/
-loopx install modularcloud/sdg-workflows            # all four
-loopx install -w ralph modularcloud/sdg-workflows   # or just one
+loopx install modularcloud/sdg-workflows              # all five (recommended)
+loopx install -w ralph modularcloud/sdg-workflows     # just ralph (standalone)
+
+# Or install one ADR workflow — must also install `shared` (library workflow)
+loopx install -w apply-adr modularcloud/sdg-workflows
+loopx install -w shared    modularcloud/sdg-workflows
 ```
 
-If you plan to use the `api` or `batch` reviewer (both call GPT-5.4-Pro), also install its Node dependencies:
+If you plan to use the `api` or `batch` reviewer (both call GPT-5.4-Pro), also install the `shared` workflow's Node dependencies:
 
 ```bash
-cd .loopx/apply-adr && npm install && cd -
-cd .loopx/review-adr && npm install && cd -
-cd .loopx/spec-test-adr && npm install && cd -
+cd .loopx/shared && npm install && cd -
 ```
 
 ## 2. Required tools on PATH
