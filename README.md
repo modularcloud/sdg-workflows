@@ -24,7 +24,7 @@ loopx install modularcloud/sdg-workflows            # all four
 loopx install -w ralph modularcloud/sdg-workflows   # or just one
 ```
 
-If you plan to use the `api` reviewer (GPT batch), also install its Node dependencies:
+If you plan to use the `api` or `batch` reviewer (both call GPT-5.4-Pro), also install its Node dependencies:
 
 ```bash
 cd .loopx/apply-adr && npm install && cd -
@@ -69,12 +69,22 @@ Sends review prompts to the local `codex` CLI instead of Telegram — fully auto
 loopx env set LOOPX_REVIEWER codex
 ```
 
-### Optional: use the OpenAI Batch API instead of Telegram for ADR reviews
+### Optional: use the OpenAI Responses API instead of Telegram for ADR reviews
 
-Submits review prompts as an OpenAI batch job (GPT-5.4-Pro) and polls until completion:
+Sends review prompts directly to GPT-5.4-Pro via the Responses API and waits for the reply synchronously — fully automated, no copy/paste, no batch polling:
 
 ```bash
 loopx env set LOOPX_REVIEWER   api
+loopx env set OPENAI_API_KEY   <your-openai-key>
+loopx env set GPT_PRO_THINKING medium               # optional: medium (default) | high | xhigh
+```
+
+### Optional: use the OpenAI Batch API instead of Telegram for ADR reviews
+
+Same as `api` but submits the prompt as a `/v1/batches` job and polls until completion. Trades latency for batch pricing:
+
+```bash
+loopx env set LOOPX_REVIEWER   batch
 loopx env set OPENAI_API_KEY   <your-openai-key>
 loopx env set GPT_PRO_THINKING medium               # optional: medium (default) | high | xhigh
 ```
