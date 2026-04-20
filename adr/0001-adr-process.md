@@ -6,11 +6,11 @@
 
 ## Context
 
-As the loopx project grows, we need a structured way to propose, evaluate, and track changes to the specification. Without a formal process, spec changes risk being ad-hoc, poorly documented, or inconsistently applied through the development lifecycle.
+As a project grows, we need a structured way to propose, evaluate, and track changes to the specification. Without a formal process, spec changes risk being ad-hoc, poorly documented, or inconsistently applied through the development lifecycle.
 
 ## Decision
 
-We adopt an Architecture Decision Record (ADR) process to govern all changes to the loopx specification (`SPEC.md`). Each ADR describes a proposed modification to the spec and progresses through a defined lifecycle before the change is considered complete.
+We adopt an Architecture Decision Record (ADR) process to govern all changes to the project specification (`SPEC.md`). Each ADR describes a proposed modification to the spec and progresses through a defined lifecycle before the change is considered complete.
 
 ### ADR Lifecycle
 
