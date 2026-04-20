@@ -12,7 +12,9 @@ A collection of [loopx](https://github.com/lzrscg/loopx) workflows used to drive
 | `review-adr` | Asks a reviewer whether a draft ADR can be marked accepted; iterates on Q&A until no questions remain. |
 | `apply-adr` | After an ADR is accepted, iterates with a reviewer to apply the ADR's changes to `SPEC.md`. |
 | `spec-test-adr` | After `SPEC.md` is updated for an ADR, iterates with a reviewer to update `TEST-SPEC.md`. |
-| `shared` | Library workflow — holds the reviewer-dispatch, Telegram Q&A loop, and feedback-done check used by the three ADR workflows. Not run directly. |
+| `review-spec` | Asks a reviewer whether `SPEC.md` is implementation-ready; iterates on Q&A until no questions remain. |
+| `review-test-spec` | Asks a reviewer whether `TEST-SPEC.md` covers `SPEC.md` correctly and completely; iterates on Q&A until no questions remain. |
+| `shared` | Library workflow — holds the reviewer-dispatch, Telegram Q&A loop, and feedback-done check used by the ADR and spec workflows. Not run directly. |
 
 ## 1. Install loopx and the workflows
 
@@ -107,6 +109,8 @@ Each workflow assumes these files exist at the project root:
 - `review-adr` — `adr/0001-adr-process.md`, `adr/NNNN-*.md` (target ADR), `SPEC.md`
 - `apply-adr` — `adr/0001-adr-process.md`, `adr/NNNN-*.md` (target ADR), `SPEC.md`
 - `spec-test-adr` — `adr/0001-adr-process.md`, `adr/NNNN-*.md` (target ADR), `SPEC.md`, `TEST-SPEC.md`
+- `review-spec` — `SPEC.md`
+- `review-test-spec` — `SPEC.md`, `TEST-SPEC.md`
 
 The target ADR is selected per run via the `ADR` env var (see §5).
 
@@ -133,6 +137,10 @@ loopx run ralph
 ADR=4 loopx run review-adr
 ADR=2 loopx run apply-adr
 ADR=2 loopx run spec-test-adr
+
+# Spec-only review — no ADR required
+loopx run review-spec
+loopx run review-test-spec
 
 loopx run -n 5 ralph   # cap iterations
 ```
