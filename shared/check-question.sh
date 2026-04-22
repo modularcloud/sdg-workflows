@@ -15,6 +15,7 @@ if [[ ! -f "$CLAUDE_OUTPUT_FILE" ]]; then
 fi
 
 CLAUDE_OUTPUT=$(cat "$CLAUDE_OUTPUT_FILE")
+CLAUDE_OUTPUT_HTML=$(printf '%s' "$CLAUDE_OUTPUT" | node "$SCRIPT_DIR/md-to-tg-html.mjs")
 
 # Use Codex with output schema to deterministically classify the output
 SCHEMA="$ROOT/.loopx/$LOOPX_WORKFLOW/check-question.schema.json"
@@ -42,7 +43,7 @@ if [[ "$HAS_QUESTION" == "true" ]]; then
   send_question() {
     local thread="$1"
     local max=4000
-    local remaining="$CLAUDE_OUTPUT"
+    local remaining="$CLAUDE_OUTPUT_HTML"
     local response=""
     local first=1
     while (( ${#remaining} > 0 )); do
@@ -63,7 +64,20 @@ if [[ "$HAS_QUESTION" == "true" ]]; then
       response=$(curl -s -X POST "${TELEGRAM_API}/sendMessage" \
         -d chat_id="$TELEGRAM_CHAT_ID" \
         -d message_thread_id="$thread" \
+        -d parse_mode=HTML \
         --data-urlencode "text=${chunk}")
+      # Chunking can split inside an HTML tag; on a parse error fall back to
+      # plain text for that chunk so the message still lands.
+      if [[ "$(echo "$response" | jq -r '.ok')" != "true" ]]; then
+        local desc
+        desc=$(echo "$response" | jq -r '.description // ""')
+        if [[ "$desc" == *"can't parse entities"* || "$desc" == *"Can't parse entities"* ]]; then
+          response=$(curl -s -X POST "${TELEGRAM_API}/sendMessage" \
+            -d chat_id="$TELEGRAM_CHAT_ID" \
+            -d message_thread_id="$thread" \
+            --data-urlencode "text=${chunk}")
+        fi
+      fi
       if [[ "$(echo "$response" | jq -r '.ok')" != "true" ]]; then
         # First-chunk failure bubbles up so the caller can retry on stale thread.
         # Later-chunk failures can't be undone, so warn and keep going.
