@@ -56,7 +56,9 @@ loopx env set TELEGRAM_BOT_TOKEN <your-bot-token>   # from @BotFather
 loopx env set TELEGRAM_CHAT_ID   <your-chat-id>     # numeric chat ID the bot posts to
 ```
 
-When a prompt is sent to Telegram, the intended flow is: **copy the prompt, paste it into ChatGPT Pro, then paste ChatGPT's answer back into the Telegram chat.** Reply messages received within a 10s window are concatenated into one answer.
+`TELEGRAM_CHAT_ID` must be a **forum-enabled supergroup** (Group Info → Edit → Topics → on), and the bot must be an admin with *Manage Topics* rights. Each run posts into its own topic named `<cwd> / <workflow>[ / ADR-NNNN]`, so concurrent runs in different repos can't step on each other. Topic IDs are cached in `~/.cache/loopx-telegram/`.
+
+When a prompt is sent to Telegram, the intended flow is: **copy the prompt, paste it into ChatGPT Pro, then paste ChatGPT's answer back into the corresponding topic.** Reply messages received within a 10s window are concatenated into one answer.
 
 ### Optional for everyone
 
