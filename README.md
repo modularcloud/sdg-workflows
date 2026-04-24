@@ -84,6 +84,7 @@ Sends review prompts directly to GPT-5.5-Pro via the Responses API and waits for
 loopx env set LOOPX_REVIEWER   api
 loopx env set OPENAI_API_KEY   <your-openai-key>
 loopx env set GPT_PRO_THINKING medium               # optional: medium (default) | high | xhigh
+loopx env set OPENAI_FLEX      true                 # optional: route through the flex service tier (lower cost, slower / capacity-dependent)
 ```
 
 ### Optional: use the OpenAI Batch API instead of Telegram for ADR reviews

@@ -9,6 +9,7 @@ const THINKING = (process.env.GPT_PRO_THINKING ?? "medium") as
   | "medium"
   | "high"
   | "xhigh";
+const FLEX = process.env.OPENAI_FLEX === "true";
 
 if (!process.env.OPENAI_API_KEY) {
   console.error(
@@ -54,7 +55,9 @@ if (existsSync(RESPONSE_ID_FILE)) {
 }
 
 if (!response) {
-  console.error(`requesting gpt-5.5-pro (thinking=${THINKING})...`);
+  console.error(
+    `requesting gpt-5.5-pro (thinking=${THINKING}${FLEX ? ", flex" : ""})...`,
+  );
   response = await client.responses.create({
     model: "gpt-5.5-pro",
     reasoning: { effort: THINKING },
@@ -62,6 +65,7 @@ if (!response) {
     background: true,
     prompt_cache_key: WORKFLOW,
     prompt_cache_retention: "24h",
+    ...(FLEX ? { service_tier: "flex" } : {}),
   });
   writeFileSync(RESPONSE_ID_FILE, response.id);
   console.error(`submitted background response ${response.id}`);
