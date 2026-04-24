@@ -31,7 +31,7 @@ loopx install -w apply-adr modularcloud/sdg-workflows
 loopx install -w shared    modularcloud/sdg-workflows
 ```
 
-If you plan to use the `api` or `batch` reviewer (both call GPT-5.4-Pro), also install the `shared` workflow's Node dependencies:
+If you plan to use the `api` or `batch` reviewer (both call GPT-5.5-Pro), also install the `shared` workflow's Node dependencies:
 
 ```bash
 cd .loopx/shared && npm install && cd -
@@ -78,7 +78,7 @@ loopx env set LOOPX_REVIEWER codex
 
 ### Optional: use the OpenAI Responses API instead of Telegram for ADR reviews
 
-Sends review prompts directly to GPT-5.4-Pro via the Responses API and waits for the reply synchronously — fully automated, no copy/paste, no batch polling:
+Sends review prompts directly to GPT-5.5-Pro via the Responses API and waits for the reply synchronously — fully automated, no copy/paste, no batch polling:
 
 ```bash
 loopx env set LOOPX_REVIEWER   api

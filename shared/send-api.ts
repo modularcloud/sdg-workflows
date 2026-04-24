@@ -54,9 +54,9 @@ if (existsSync(RESPONSE_ID_FILE)) {
 }
 
 if (!response) {
-  console.error(`requesting gpt-5.4-pro (thinking=${THINKING})...`);
+  console.error(`requesting gpt-5.5-pro (thinking=${THINKING})...`);
   response = await client.responses.create({
-    model: "gpt-5.4-pro",
+    model: "gpt-5.5-pro",
     reasoning: { effort: THINKING },
     input: prompt,
     background: true,
@@ -92,7 +92,7 @@ while (!TERMINAL.has(response.status ?? "")) {
     }
     rmSync(RESPONSE_ID_FILE, { force: true });
     throw new Error(
-      `gpt-5.4-pro response ${response.id} did not complete within ${DEADLINE_SECS / 60} minutes (last status: ${response.status ?? "unknown"})`,
+      `gpt-5.5-pro response ${response.id} did not complete within ${DEADLINE_SECS / 60} minutes (last status: ${response.status ?? "unknown"})`,
     );
   }
   if (response.status !== lastStatus) {
@@ -121,7 +121,7 @@ if (response.status !== "completed") {
         ? `: ${response.error.message}`
         : "";
   throw new Error(
-    `gpt-5.4-pro response ${response.id} ended in status ${response.status}${detail}`,
+    `gpt-5.5-pro response ${response.id} ended in status ${response.status}${detail}`,
   );
 }
 
@@ -144,7 +144,7 @@ const answer =
     .join("\n");
 
 if (!answer) {
-  throw new Error("gpt-5.4-pro returned no output text");
+  throw new Error("gpt-5.5-pro returned no output text");
 }
 
 writeFileSync(FEEDBACK_FILE, answer);
@@ -153,7 +153,7 @@ writeFileSync(FEEDBACK_FILE, answer);
 // check-feedback-done and strand the loop.
 rmSync(PROMPT_FILE, { force: true });
 rmSync(RESPONSE_ID_FILE, { force: true });
-console.error("=== Feedback received from GPT-5.4-Pro ===");
+console.error("=== Feedback received from GPT-5.5-Pro ===");
 
 execFileSync(BIN, ["output", "--goto", "check-feedback-done"], {
   stdio: "inherit",
