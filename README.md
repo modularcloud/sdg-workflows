@@ -108,14 +108,14 @@ loopx env remove <NAME>
 
 Each workflow assumes these files exist at the project root:
 
-- `ralph` — `PROMPT.md`
+- `ralph` — `SPEC.md`, `TEST-SPEC.md`, `fix_plan.md` (created by the loop on first run if absent); `adr/NNNN-*.md` only when `ADR` is set (see §5)
 - `review-adr` — `adr/0001-adr-process.md`, `adr/NNNN-*.md` (target ADR), `SPEC.md`
 - `apply-adr` — `adr/0001-adr-process.md`, `adr/NNNN-*.md` (target ADR), `SPEC.md`
 - `spec-test-adr` — `adr/0001-adr-process.md`, `adr/NNNN-*.md` (target ADR), `SPEC.md`, `TEST-SPEC.md`
 - `review-spec` — `SPEC.md`
 - `review-test-spec` — `SPEC.md`, `TEST-SPEC.md`
 
-The target ADR is selected per run via the `ADR` env var (see §5).
+`ralph` no longer needs a hand-written `PROMPT.md` at the project root — it resolves its own prompts from `.loopx/ralph/prompts/{core,test}/` based on the `STAGE` (and optional `ADR`) env vars (see §5) and writes them to `.loopx/ralph/.tmp/` each iteration. The target ADR for the ADR workflows is selected per run via the `ADR` env var (see §5).
 
 ### Bootstrap the `adr/` directory
 
@@ -131,10 +131,18 @@ Then author your own target ADRs as `adr/NNNN-short-slug.md` (e.g. `adr/0002-run
 
 ## 5. Run
 
-The three ADR workflows resolve their target ADR from the `ADR` env var. Either `ADR=4` or `ADR=0004` works — the value is zero-padded to four digits and matched against `adr/NNNN-*.md`.
+The three ADR workflows and `ralph` resolve their target ADR from the `ADR` env var. Either `ADR=4` or `ADR=0004` works — the value is zero-padded to four digits and matched against `adr/NNNN-*.md`. `ralph` additionally requires `STAGE` (`core` or `test`):
+
+- `STAGE=core` — implement / update `SPEC.md`-driven behavior
+- `STAGE=test` — implement / update `TEST-SPEC.md`-driven test harness
+- when `ADR` is set, `ralph` swaps in the `*.update.md` prompt variants that tell the agent to fold in the changes introduced by that ADR; when `ADR` is unset, the base variants are used
 
 ```bash
-loopx run ralph
+# ralph — STAGE required, ADR optional
+STAGE=core loopx run ralph                  # implement core spec from scratch
+STAGE=test loopx run ralph                  # implement test harness from scratch
+ADR=2 STAGE=core loopx run ralph            # update core impl after ADR-0002
+ADR=2 STAGE=test loopx run ralph            # update tests after ADR-0002
 
 # ADR workflows — set ADR per run
 ADR=4 loopx run review-adr
@@ -145,7 +153,7 @@ ADR=2 loopx run spec-test-adr
 loopx run review-spec
 loopx run review-test-spec
 
-loopx run -n 5 ralph   # cap iterations
+STAGE=core loopx run -n 5 ralph   # cap iterations
 ```
 
 Each workflow halts on its own when done (`stop: true`) or when `-n` is hit. Ctrl-C also exits cleanly.
